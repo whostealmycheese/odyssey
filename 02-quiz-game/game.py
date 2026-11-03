@@ -157,6 +157,51 @@ class QuizGame:
             print("   새로운 최고 기록을 경신하기 위해 계속 도전해 보세요!")
         print("=" * 44)
 
+    def add_quiz(self) -> None:
+        """새로운 퀴즈를 입력받아 등록하고 state.json에 실시간 저장"""
+        print("\n" + "=" * 44)
+        print("          📌 새로운 퀴즈 추가")
+        print("=" * 44)
+
+        # 주제(카테고리) 선택 또는 직접 입력
+        print("퀴즈 주제(카테고리)를 선택하세요:")
+        for idx, cat in enumerate(self.categories, start=1):
+            print(f"  {idx}. {cat}")
+        print(f"  {len(self.categories) + 1}. 새로운 주제 직접 입력")
+
+        cat_choice = get_valid_integer("선택: ", 1, len(self.categories) + 1)
+        if cat_choice <= len(self.categories):
+            selected_category = self.categories[cat_choice - 1]
+        else:
+            selected_category = get_non_empty_string("새로운 주제 이름을 입력하세요 (예: 과학, 역사): ")
+            if selected_category not in self.categories:
+                self.categories.append(selected_category)
+
+        # 문제 및 4지선다 선택지 입력
+        print(f"\n[{selected_category}] 주제의 퀴즈 정보를 입력합니다.")
+        question = get_non_empty_string("문제를 입력하세요: ")
+
+        choices = []
+        for i in range(1, 5):
+            choice = get_non_empty_string(f"선택지 {i}: ")
+            choices.append(choice)
+
+        answer = get_valid_integer("정답 번호 (1-4): ", 1, 4)
+
+        # 객체 생성 및 목록 추가
+        new_quiz = Quiz(
+            question=question,
+            choices=choices,
+            answer=answer,
+            category=selected_category
+        )
+        self.quizzes.append(new_quiz)
+
+        if self.save_state():
+            print(f"\n✅ 퀴즈가 성공적으로 등록되고 파일에 저장되었습니다! (총 {len(self.quizzes)}문항)")
+        else:
+            print("\n⚠️ 퀴즈는 메모리에 추가되었으나 파일 저장에 실패했습니다.")
+
     def print_menu(self) -> int:
         """메인 메뉴 출력 및 사용자 선택 번호 반환"""
         print("\n" + "=" * 44)
