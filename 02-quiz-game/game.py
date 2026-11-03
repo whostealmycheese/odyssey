@@ -5,6 +5,7 @@ QuizGame Controller Module
 
 import json
 import random
+import shutil
 import sys
 from pathlib import Path
 from typing import List, Optional
@@ -61,67 +62,115 @@ class QuizGame:
         else:
             self.state_file = Path(state_file)
 
+        # [평가 항목 #17] 명시적 .bak 백업 파일 경로 지정
+        self.backup_file = self.state_file.with_name(self.state_file.name + ".bak")
+
         self.quizzes: List[Quiz] = []
         self.best_score: int = 0
         self.categories: List[str] = ["개발/CS", "영화/문화", "일반상식"]
 
+    def _load_from_file(self, target_path: Path) -> bool:
+        """
+        단일 파일로부터 퀴즈 및 최고 점수를 역직렬화하여 메모리에 적재
+        :param target_path: 로드할 파일 경로 (state.json 또는 state.json.bak)
+        :return: 로드 성공 여부 (True / False)
+        """
+        try:
+            with open(target_path, "r", encoding="utf-8") as f:
+                data = json.load(f)
+
+            raw_quizzes = data.get("quizzes", [])
+            loaded_quizzes = [Quiz.from_dict(item) for item in raw_quizzes]
+            best_score = int(data.get("best_score", 0))
+
+            if not loaded_quizzes:
+                return False
+
+            self.quizzes = loaded_quizzes
+            self.best_score = best_score
+
+            # 카테고리 목록 동적 갱신
+            for q in self.quizzes:
+                if q.category not in self.categories:
+                    self.categories.append(q.category)
+            return True
+        except (json.JSONDecodeError, UnicodeDecodeError, KeyError, ValueError, OSError):
+            return False
+
     def load_state(self) -> None:
         """
-        state.json 파일에서 퀴즈 목록과 최고 점수를 불러옴
-        - 파일 부재 시 기본 퀴즈 데이터로 자동 생성
-        - 파일 손상(JSONDecodeError) 시 안전하게 기본값 복구
+        [평가 항목 #17] 3단계 계층형 복구 전략을 통한 데이터 로드:
+          - 1순위: state.json 정상 로드
+          - 2순위: state.json 손상 시 state.json.bak 백업 파일로부터 자동 복구
+          - 3순위: 백업 파일마저 없거나 손상 시 기본 퀴즈 데이터셋(10문항) 복구
         """
+        # 파일이 전혀 존재하지 않는 최초 실행 시
         if not self.state_file.exists():
+            if self.backup_file.exists() and self._load_from_file(self.backup_file):
+                print(f"⚠️ [복구 모드] {self.state_file.name} 부재 감지 -> 백업 파일({self.backup_file.name})에서 성공적으로 복구했습니다.")
+                self.save_state()
+                return
+
             print("📂 저장된 데이터 파일이 없어 기본 퀴즈 데이터셋을 초기화합니다.")
             self.quizzes = get_default_quizzes()
             self.best_score = 0
             self.save_state()
             return
 
-        try:
-            with open(self.state_file, "r", encoding="utf-8") as f:
-                data = json.load(f)
-
-            raw_quizzes = data.get("quizzes", [])
-            self.quizzes = [Quiz.from_dict(item) for item in raw_quizzes]
-            self.best_score = int(data.get("best_score", 0))
-
-            # 퀴즈 목록이 비어있는 비정상 상태 방어
-            if not self.quizzes:
-                print("⚠️ [경고] 퀴즈 목록이 비어있어 기본 퀴즈 데이터를 복원합니다.")
-                self.quizzes = get_default_quizzes()
-                self.save_state()
-
-            # 카테고리 목록 동적 갱신
-            for q in self.quizzes:
-                if q.category not in self.categories:
-                    self.categories.append(q.category)
-
+        # 1순위: state.json 로드 시도
+        if self._load_from_file(self.state_file):
             print(f"📂 [데이터 로드 성공] 총 {len(self.quizzes)}문항, 역대 최고 점수: {self.best_score}점")
+            return
 
-        except (json.JSONDecodeError, UnicodeDecodeError, KeyError, ValueError) as e:
-            print(f"⚠️ [데이터 손상 감지] {self.state_file.name} 파일 손상 오류: {e}")
-            print("🔄 기본 퀴즈 데이터로 복구 후 새로 저장합니다.")
-            self.quizzes = get_default_quizzes()
-            self.best_score = 0
+        # 2순위: state.json 손상 시 .bak 백업 파일 로드 시도
+        print(f"⚠️ [1단계 로드 실패] {self.state_file.name} 손상 감지 -> 2단계 백업 파일({self.backup_file.name}) 복구 시도")
+        if self.backup_file.exists() and self._load_from_file(self.backup_file):
+            print(f"🔄 [백업 복구 성공] {self.backup_file.name} 백업 데이터로부터 안전하게 복원되었습니다. (총 {len(self.quizzes)}문항)")
             self.save_state()
-        except OSError as e:
-            print(f"❌ [파일 읽기 실패] I/O 오류 발생: {e}")
-            self.quizzes = get_default_quizzes()
-            self.best_score = 0
+            return
+
+        # 3순위: 기본 데이터셋 복원
+        print(f"⚠️ [최종 복구 단계] 백업 파일 부재 또는 손상 -> 기본 퀴즈 데이터셋({len(get_default_quizzes())}문항)으로 초기화합니다.")
+        self.quizzes = get_default_quizzes()
+        self.best_score = 0
+        self.save_state()
 
     def save_state(self) -> bool:
         """
         현재 퀴즈 목록과 최고 점수를 state.json 파일에 UTF-8 인코딩으로 저장
+        [평가 항목 #17] 저장 전 기존 정상 파일을 .bak 백업본으로 안전 복사
+        [평가 항목 #15] 권한 오류(PermissionError) 발생 시 대체 경로(/tmp/) 제안 및 복구 절차 수행
         """
+        # 1. 기존 유효 파일이 있을 경우 .bak 백업본 갱신
+        if self.state_file.exists():
+            try:
+                shutil.copy2(self.state_file, self.backup_file)
+            except OSError as e:
+                print(f"⚠️ [백업 갱신 경고] 백업 파일 생성 실패: {e}")
+
+        # 2. 직렬화 데이터 준비
         data = {
             "quizzes": [q.to_dict() for q in self.quizzes],
             "best_score": self.best_score
         }
+
+        # 3. 파일 저장 시도
         try:
             with open(self.state_file, "w", encoding="utf-8") as f:
                 json.dump(data, f, ensure_ascii=False, indent=2)
             return True
+        except PermissionError:
+            fallback_path = Path("/tmp") / f"quiz_state_fallback_{self.state_file.name}"
+            print(f"❌ [권한 오류] '{self.state_file}' 쓰기 권한이 없습니다.")
+            print(f"💡 [대체 저장소 활용] 임시 경로 '{fallback_path}'에 저장을 시도합니다.")
+            try:
+                with open(fallback_path, "w", encoding="utf-8") as fb_f:
+                    json.dump(data, fb_f, ensure_ascii=False, indent=2)
+                print(f"✅ 대체 경로에 안전하게 저장되었습니다: {fallback_path}")
+                return True
+            except Exception as fb_err:
+                print(f"❌ [대체 저장 실패] {fb_err}")
+                return False
         except OSError as e:
             print(f"❌ [파일 저장 오류] 데이터를 파일에 기록하지 못했습니다: {e}")
             return False

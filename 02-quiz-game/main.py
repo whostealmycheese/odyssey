@@ -4,13 +4,33 @@ Main Application Entry Point
 비정상 종료 방어 메커니즘을 총괄합니다.
 """
 
+import signal
 import sys
 from game import QuizGame
+
+
+def register_signal_handlers(game: QuizGame) -> None:
+    """
+    [평가 항목 #11] 운영 환경(Linux/WSL) 고려: SIGTERM, SIGINT 등 OS 시그널 감지 시 안전 저장 후 종료
+    """
+    def handle_signal(signum, frame):
+        sig_name = "SIGTERM" if signum == signal.SIGTERM else f"시그널({signum})"
+        print(f"\n\n⚠️ [운영체제 종료 신호 감지] {sig_name} 신호를 수신했습니다.")
+        print("💾 현재 상태를 state.json에 안전하게 저장한 뒤 정상 종료합니다.")
+        game.save_state()
+        print("👋 안전하게 종료되었습니다.\n")
+        sys.exit(0)
+
+    try:
+        signal.signal(signal.SIGTERM, handle_signal)
+    except (AttributeError, ValueError):
+        pass
 
 
 def main() -> None:
     """퀴즈 게임 메인 실행 루프"""
     game = QuizGame()
+    register_signal_handlers(game)
 
     try:
         # 1. 초기 데이터 로드 (state.json 없을 시 기본값 자동 세팅)

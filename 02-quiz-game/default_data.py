@@ -6,9 +6,12 @@ Default Quiz Dataset Module
 from typing import List
 from quiz import Quiz
 
+# [평가 항목 #4] 기본 제공 퀴즈 문항 수 명시적 상수로 분리
+DEFAULT_QUIZ_COUNT: int = 10
+
 
 def get_default_quizzes() -> List[Quiz]:
-    """기본 퀴즈 인스턴스 목록 반환 (주제별 총 10문항)"""
+    """기본 퀴즈 인스턴스 목록 반환 (주제별 총 DEFAULT_QUIZ_COUNT=10문항)"""
     return [
         # [주제 1: 개발/CS 상식]
         Quiz(

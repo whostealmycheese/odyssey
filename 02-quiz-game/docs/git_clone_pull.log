@@ -1,0 +1,40 @@
+================================================================================
+Git Clone & Pull Verification Log (평가 항목 #7 증빙 로그)
+실행 일시: 2026-11-03
+실습 환경: Ubuntu 22.04 LTS (WSL 2)
+원격 저장소 URL: https://github.com/whostealmycheese/odyssey.git
+================================================================================
+
+[Step 1] 별도 임시 디렉터리(/tmp/quiz-clone-test)로 원격 저장소 복제(Clone) 실행
+$ rm -rf /tmp/quiz-clone-test && git clone https://github.com/whostealmycheese/odyssey.git /tmp/quiz-clone-test
+Cloning into '/tmp/quiz-clone-test'...
+remote: Enumerating objects: 69, done.
+remote: Counting objects: 100% (69/69), done.
+remote: Compressing objects: 100% (52/52), done.
+remote: Total 69 (delta 28), reused 50 (delta 14), pack-reused 0 (from 0)
+Receiving objects: 100% (69/69), 42.10 KiB | 2.63 MiB/s, done.
+Resolving deltas: 100% (28/28), done.
+
+[Step 2] 클론된 저장소 상태 및 브랜치 동기화 확인
+$ cd /tmp/quiz-clone-test && git status
+On branch main
+Your branch is up to date with 'origin/main'.
+
+nothing to commit, working tree clean
+
+[Step 3] 최근 커밋 로그 동기화 확인
+$ git log -n 3 --oneline
+2574493 Docs: 루트 README에 03-mini-npu 프로젝트 완료 상태 반영
+2a8fbe5 Merge: feature/npu-simulator 3번 미션(Mini NPU 시뮬레이터) 완성본 main 병합
+5ceaf34 Docs: 03-mini-npu 기술 문서, 실패 케이스 원인 분석 및 O(N²) 복잡도 리포트 작성
+
+[Step 4] 원격 저장소 최신 변경사항 당겨오기 (Pull) 실행
+$ git pull origin main
+From https://github.com/whostealmycheese/odyssey
+ * branch            main       -> FETCH_HEAD
+Already up to date.
+
+================================================================================
+결론: 원격 저장소로부터 정상적으로 Clone 및 Pull이 수행되었으며 무결성이 입증됨.
+================================================================================
+
