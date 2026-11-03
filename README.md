@@ -10,6 +10,7 @@
 | :--- | :--- | :---: | :--- |
 | **`01-dev-workstation`** | **내 컴퓨터에 개발자용 '작업실' 꾸미기**<br>- Linux CLI 및 권한 제어<br>- Docker 컨테이너 및 커스텀 Dockerfile 웹서버<br>- 포트 매핑, 바인드 마운트, 볼륨 영속성 검증<br>- Git/GitHub & VSCode 원격 개발 환경 연동 | ✅ 완료 | [📖 기술 문서 바로가기](./01-dev-workstation/README.md) |
 | **`02-quiz-game`** | **Python 콘솔 퀴즈 게임 만들기**<br>- 객체지향 설계 (`Quiz`, `QuizGame` 클래스 분리)<br>- 주제 선택 기능 및 4지선다형 퀴즈 출제/추가/점수<br>- JSON 데이터 영속성 (`state.json`)<br>- Git 기능 단위 커밋, 브랜치 분기/병합, Clone/Pull 실습 | ✅ 완료 | [📖 퀴즈 게임 문서 바로가기](./02-quiz-game/README.md) |
+| **`03-mini-npu`** | **AI MAC 연산 시뮬레이터 (Mini NPU)**<br>- 순수 반복문 기반 2차원 MAC(Multiply-Accumulate) 연산기<br>- 비정형 라벨 정규화(`Cross`, `X`) 및 Epsilon(`1e-9`) 동점 판정<br>- $3 \times 3 \sim 25 \times 25$ 크기별 $O(N^2)$ 시간 복잡도 분석<br>- 1차원 평탄화 메모리 최적화(+53% 성능 개선) 및 패턴 생성기 | ✅ 완료 | [📖 NPU 시뮬레이터 문서 바로가기](./03-mini-npu/README.md) |
 
 ---
 
