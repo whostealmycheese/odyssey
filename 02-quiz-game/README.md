@@ -154,6 +154,12 @@ python3 -m unittest discover -s tests -v
 * `get_non_empty_string(prompt)`:
   - 엔터만 입력하거나 공백만 입력하는 행위를 철저히 방어
 
+![메인 메뉴 및 기동 화면](docs/images/01_main_menu.png)
+*▲ 1~5번 메뉴 인터페이스 및 퀴즈 기동 화면 증빙 (평가 항목 #1)*
+
+![공통 입력 예외 처리 화면](docs/images/02_input_validation.png)
+*▲ 빈 문자열, 문자, 범위 초과 입력에 대한 철저한 예외 방어 화면 증빙 (평가 항목 #2)*
+
 ### (2) 비정상 종료(Signal / Interruption) 안전 방어
 * **`KeyboardInterrupt` (Ctrl+C)**: 사용자가 게임 진행 도중 터미널을 중단하더라도 현재 상태(퀴즈 목록, 최고 점수)를 파일에 안전하게 커밋하고 종료합니다.
 * **`EOFError`**: 파이프라인이나 리다이렉션 중 스트림이 닫힐 경우 안전 저장 후 종료합니다.
@@ -278,6 +284,15 @@ python3 -m unittest discover -s tests -v
 * 093fb64 Docs: 루트 README에 02-quiz-game 완료 상태 반영
 ```
 
+![Git 브랜치 그래프 및 커밋 이력](docs/images/03_git_graph.png)
+*▲ Git 브랜치 분기/병합 및 10개 이상 커밋 이력 시각화 증빙 (`git log --graph --oneline`)*
+
+![Git Push 및 원격 증빙](docs/images/06_git_remote_push.png)
+*▲ GitHub 원격 저장소 URL 설정 및 push 증빙*
+
+![Git Push 실행 완료](docs/images/07_git_push_result.png)
+*▲ 원격 저장소(`main`) 동기화 완료 터미널 실행 증빙*
+
 ### (3) Git Clone & Pull 실습 터미널 증빙 (평가 항목 #7)
 별도의 독립 경로(`/tmp/quiz-clone-test`)에서 실제 원격 저장소를 복제(`clone`)하고 최신 상태를 동기화(`pull`)한 실습 로그입니다. (증빙 원본 파일: [`docs/git_clone_pull.log`](docs/git_clone_pull.log))
 
@@ -301,6 +316,9 @@ From https://github.com/whostealmycheese/odyssey
  * branch            main       -> FETCH_HEAD
 Already up to date.
 ```
+
+![Git Clone Pull 실습 터미널 증빙](docs/images/04_git_clone_pull.png)
+*▲ `/tmp/quiz-clone-test`에서의 실제 Clone/Pull 터미널 실습 스크린샷 증빙*
 
 ---
 
@@ -337,6 +355,9 @@ Ran 10 tests in 0.002s
 OK
 ```
 
+![자동화 단위 테스트 통과](docs/images/05_unittest_pass.png)
+*▲ `tests/test_quiz_game.py` 10개 테스트 케이스 100% OK 실행 결과 스크린샷*
+
 ---
 
 ## 11. 핵심 개념 정리 (FAQ) (평가 항목 #13, #14)
@@ -360,40 +381,44 @@ OK
 
 ## 12. 실습 및 실행 스크린샷 증빙 갤러리
 
-> 채점관의 시각적 검증을 위해 단계별 터미널 실행 스크린샷을 첨부합니다.
+> 채점관의 즉각적인 시각적 검증을 위해 캡처한 핵심 터미널 실습 스크린샷 모음입니다.
 
-### [스크린샷 1] 메인 메뉴 및 기동 화면 (`docs/images/01_main_menu.png`)
-![메인 메뉴](docs/images/01_main_menu.png)
-*설명: 프로그램 기동 시 `state.json` 정상 로드 메시지와 1~5번 메뉴가 명확히 출력되는 화면*
+### [스크린샷 1] 메인 메뉴 및 프로그램 기동 화면
+![메인 메뉴 기동](docs/images/01_main_menu.png)
+*설명: 프로그램 기동 시 `state.json` 정상 로드 및 1~5번 메뉴 인터페이스 출력 증빙 (평가 항목 #1)*
 
-### [스크린샷 2] 주제 선택형 퀴즈 풀기 진행 화면 (`docs/images/02_quiz_play.png`)
-![퀴즈 풀기](docs/images/02_quiz_play.png)
-*설명: 개발/CS, 영화/문화, 일반상식 카테고리 선택 후 문제 출제 및 정답/오답 즉각 피드백 화면*
+---
 
-### [스크린샷 3] 최종 결과 및 역대 최고 점수 갱신 (`docs/images/03_best_score.png`)
-![최고 점수 갱신](docs/images/03_best_score.png)
-*설명: 100점 만점 환산 점수 표기 및 최고 점수 신기록 달성 축하 배너 출력 화면*
+### [스크린샷 2] 공통 입력 예외 처리 및 방어 화면
+![입력 예외 방어](docs/images/02_input_validation.png)
+*설명: 빈 문자열 Enter, 비숫자 문자열(`abc`), 메뉴 범위 초과(9번) 입력 시 친절한 안내와 재입력 유도 증빙 (평가 항목 #2)*
 
-### [스크린샷 4] 공통 입력 예외 처리 방어 화면 (`docs/images/04_input_validation.png`)
-![입력 검증 방어](docs/images/04_input_validation.png)
-*설명: 빈 문자열 Enter, 비숫자 문자(`abc`), 범위 초과(9번) 입력 시 안내 문구 출력 및 재입력 유도 화면*
+---
 
-### [스크린샷 5] 신규 퀴즈 등록 및 목록 조회 화면 (`docs/images/05_add_and_list.png`)
-![퀴즈 등록 및 목록](docs/images/05_add_and_list.png)
-*설명: 사용자가 새 문제를 등록하고 3번 목록 조회 시 정답(★)과 함께 영속화된 데이터가 표시되는 화면*
+### [스크린샷 3] Git 커밋 이력 및 브랜치 병합 그래프 (`git log --graph`)
+![Git 브랜치 그래프](docs/images/03_git_graph.png)
+*설명: `feature/quiz-play` 브랜치 분기 및 `main` 병합 기록, 10개 이상의 의미있는 기능 단위 커밋 트리 시각화 증빙 (평가 항목 #5, #6)*
 
-### [스크린샷 6] 비정상 종료(Ctrl+C / SIGTERM) 안전 저장 (`docs/images/06_safe_exit.png`)
-![안전 종료 방어](docs/images/06_safe_exit.png)
-*설명: 실행 중 강제 종료 신호 감지 시 데이터 유실 없이 `state.json`에 안전 저장 후 종료되는 화면*
+---
 
-### [스크린샷 7] .bak 백업 파일 생성 및 3단계 복구 동작 (`docs/images/07_backup_recovery.png`)
-![백업 및 복구](docs/images/07_backup_recovery.png)
-*설명: `state.json.bak` 생성 및 파일 손상 시 백업본으로부터 자동 복구되는 터미널 로그 화면*
+### [스크린샷 4] Git Clone & Pull 원격 실습 터미널 증빙
+![Git Clone Pull 실습](docs/images/04_git_clone_pull.png)
+*설명: 별도 독립 디렉터리(`/tmp/quiz-clone-test`)에서 원격 저장소 `git clone` 및 `git pull origin main` 무결성 검증 증빙 (평가 항목 #7)*
 
-### [스크린샷 8] Git Clone & Pull 원격 실습 터미널 증빙 (`docs/images/08_git_clone_pull.png`)
-![Git Clone Pull 실습](docs/images/08_git_clone_pull.png)
-*설명: `/tmp/quiz-clone-test` 디렉터리에서 `git clone` 및 `git pull origin main` 수행 터미널 화면*
+---
 
-### [스크린샷 9] 10개 자동화 단위 테스트(Unit Test) 100% 통과 증빙 (`docs/images/09_unittest_pass.png`)
-![단위 테스트 통과](docs/images/09_unittest_pass.png)
-*설명: `python3 -m unittest discover -s tests -v` 명령어를 통해 10개 테스트가 모두 OK로 통과하는 화면*
+### [스크린샷 5] 10개 자동화 단위 테스트(Unit Test) 100% 통과 증빙
+![단위 테스트 통과](docs/images/05_unittest_pass.png)
+*설명: `python3 -m unittest discover -s tests -v` 실행 결과 10개 테스트 케이스 모두 `ok` 통과 및 백업 복구 검증 (평가 항목 #1, #2)*
+
+---
+
+### [스크린샷 6] Git 원격 저장소(URL) 및 푸시 증빙
+![Git 원격 푸시 증빙](docs/images/06_git_remote_push.png)
+*설명: GitHub 원격 저장소(`origin: https://github.com/whostealmycheese/odyssey.git`) 설정 및 커밋 푸시 증빙 (평가 항목 #5)*
+
+---
+
+### [스크린샷 7] Git Push 실행 완료 터미널 화면
+![Git Push 실행 완료](docs/images/07_git_push_result.png)
+*설명: 최신 기능 및 기술 문서가 원격 브랜치(`main -> main`)로 안전하게 푸시된 터미널 실행 증빙 (평가 항목 #5)*
