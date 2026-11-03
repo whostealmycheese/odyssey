@@ -3,6 +3,7 @@ QuizGame Controller Module
 게임의 전반적인 라이프사이클(메뉴 표시, 입력 유효성 검증, 화면 출력)을 관리합니다.
 """
 
+import json
 import sys
 from pathlib import Path
 from typing import List, Optional
@@ -62,6 +63,67 @@ class QuizGame:
         self.quizzes: List[Quiz] = []
         self.best_score: int = 0
         self.categories: List[str] = ["개발/CS", "영화/문화", "일반상식"]
+
+    def load_state(self) -> None:
+        """
+        state.json 파일에서 퀴즈 목록과 최고 점수를 불러옴
+        - 파일 부재 시 기본 퀴즈 데이터로 자동 생성
+        - 파일 손상(JSONDecodeError) 시 안전하게 기본값 복구
+        """
+        if not self.state_file.exists():
+            print("📂 저장된 데이터 파일이 없어 기본 퀴즈 데이터셋을 초기화합니다.")
+            self.quizzes = get_default_quizzes()
+            self.best_score = 0
+            self.save_state()
+            return
+
+        try:
+            with open(self.state_file, "r", encoding="utf-8") as f:
+                data = json.load(f)
+
+            raw_quizzes = data.get("quizzes", [])
+            self.quizzes = [Quiz.from_dict(item) for item in raw_quizzes]
+            self.best_score = int(data.get("best_score", 0))
+
+            # 퀴즈 목록이 비어있는 비정상 상태 방어
+            if not self.quizzes:
+                print("⚠️ [경고] 퀴즈 목록이 비어있어 기본 퀴즈 데이터를 복원합니다.")
+                self.quizzes = get_default_quizzes()
+                self.save_state()
+
+            # 카테고리 목록 동적 갱신
+            for q in self.quizzes:
+                if q.category not in self.categories:
+                    self.categories.append(q.category)
+
+            print(f"📂 [데이터 로드 성공] 총 {len(self.quizzes)}문항, 역대 최고 점수: {self.best_score}점")
+
+        except (json.JSONDecodeError, UnicodeDecodeError, KeyError, ValueError) as e:
+            print(f"⚠️ [데이터 손상 감지] {self.state_file.name} 파일 손상 오류: {e}")
+            print("🔄 기본 퀴즈 데이터로 복구 후 새로 저장합니다.")
+            self.quizzes = get_default_quizzes()
+            self.best_score = 0
+            self.save_state()
+        except OSError as e:
+            print(f"❌ [파일 읽기 실패] I/O 오류 발생: {e}")
+            self.quizzes = get_default_quizzes()
+            self.best_score = 0
+
+    def save_state(self) -> bool:
+        """
+        현재 퀴즈 목록과 최고 점수를 state.json 파일에 UTF-8 인코딩으로 저장
+        """
+        data = {
+            "quizzes": [q.to_dict() for q in self.quizzes],
+            "best_score": self.best_score
+        }
+        try:
+            with open(self.state_file, "w", encoding="utf-8") as f:
+                json.dump(data, f, ensure_ascii=False, indent=2)
+            return True
+        except OSError as e:
+            print(f"❌ [파일 저장 오류] 데이터를 파일에 기록하지 못했습니다: {e}")
+            return False
 
     def print_menu(self) -> int:
         """메인 메뉴 출력 및 사용자 선택 번호 반환"""
