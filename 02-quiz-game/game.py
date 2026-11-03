@@ -125,6 +125,38 @@ class QuizGame:
             print(f"❌ [파일 저장 오류] 데이터를 파일에 기록하지 못했습니다: {e}")
             return False
 
+    def list_quizzes(self) -> None:
+        """등록된 전체 퀴즈 목록을 주제별로 보기 쉽게 출력"""
+        print("\n" + "=" * 44)
+        print("          📋 등록된 전체 퀴즈 목록")
+        print("=" * 44)
+
+        if not self.quizzes:
+            print("⚠️ 등록된 퀴즈가 없습니다. 메뉴에서 새 퀴즈를 추가해 보세요.")
+            return
+
+        print(f"총 {len(self.quizzes)}개의 퀴즈가 등록되어 있습니다.\n")
+        for idx, q in enumerate(self.quizzes, start=1):
+            print(f"[{idx}] [{q.category}] {q.question}")
+            for c_idx, choice in enumerate(q.choices, start=1):
+                marker = " ★(정답)" if c_idx == q.answer else ""
+                print(f"    {c_idx}. {choice}{marker}")
+            print("-" * 44)
+
+    def show_best_score(self) -> None:
+        """역대 최고 점수 확인"""
+        print("\n" + "=" * 44)
+        print("          🏆 역대 최고 점수 명예의 전당")
+        print("=" * 44)
+
+        if self.best_score == 0:
+            print("🎯 아직 기록된 최고 점수가 없습니다.")
+            print("   메뉴 1번을 선택해 첫 번째 퀴즈에 도전해 보세요!")
+        else:
+            print(f"⭐ 현재 최고 점수: {self.best_score}점")
+            print("   새로운 최고 기록을 경신하기 위해 계속 도전해 보세요!")
+        print("=" * 44)
+
     def print_menu(self) -> int:
         """메인 메뉴 출력 및 사용자 선택 번호 반환"""
         print("\n" + "=" * 44)
