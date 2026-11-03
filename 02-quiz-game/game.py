@@ -4,6 +4,7 @@ QuizGame Controller Module
 """
 
 import json
+import random
 import sys
 from pathlib import Path
 from typing import List, Optional
@@ -155,6 +156,74 @@ class QuizGame:
         else:
             print(f"⭐ 현재 최고 점수: {self.best_score}점")
             print("   새로운 최고 기록을 경신하기 위해 계속 도전해 보세요!")
+        print("=" * 44)
+
+    def play_quiz(self) -> None:
+        """주제 선택 및 퀴즈 출제, 실시간 채점, 최고 점수 갱신 루프"""
+        print("\n" + "=" * 44)
+        print("          📝 퀴즈 풀기 모드")
+        print("=" * 44)
+
+        if not self.quizzes:
+            print("⚠️ 출제 가능한 퀴즈가 없습니다. 퀴즈를 먼저 등록해 주세요.")
+            return
+
+        # 1. 주제 선택 메뉴
+        print("도전할 퀴즈 주제를 선택해 주세요:")
+        for idx, cat in enumerate(self.categories, start=1):
+            count = sum(1 for q in self.quizzes if q.category == cat)
+            print(f"  {idx}. {cat} ({count}문제)")
+        all_option_num = len(self.categories) + 1
+        print(f"  {all_option_num}. 전체 주제 섞어서 풀기 (총 {len(self.quizzes)}문제)")
+
+        choice = get_valid_integer("선택: ", 1, all_option_num)
+
+        if choice <= len(self.categories):
+            selected_cat = self.categories[choice - 1]
+            target_quizzes = [q for q in self.quizzes if q.category == selected_cat]
+        else:
+            selected_cat = "전체 주제"
+            target_quizzes = list(self.quizzes)
+
+        if not target_quizzes:
+            print(f"⚠️ [{selected_cat}] 주제에 등록된 문제가 없습니다.")
+            return
+
+        # 2. 문제 출제 준비 (랜덤 셔플)
+        pool = list(target_quizzes)
+        random.shuffle(pool)
+
+        total_questions = len(pool)
+        correct_count = 0
+
+        print(f"\n🚀 [{selected_cat}] 퀴즈를 시작합니다! (총 {total_questions}문항)\n" + "-" * 44)
+
+        # 3. 퀴즈 출제 및 풀이 루프
+        for q_idx, quiz in enumerate(pool, start=1):
+            quiz.display(q_idx)
+            user_choice = get_valid_integer("정답 입력 (1-4): ", 1, 4)
+
+            if quiz.is_correct(user_choice):
+                print("✅ 정답입니다! (+10점)")
+                correct_count += 1
+            else:
+                correct_answer_text = quiz.choices[quiz.answer - 1]
+                print(f"❌ 오답입니다. (정답: {quiz.answer}번 - {correct_answer_text})")
+
+            print("-" * 44)
+
+        # 4. 점수 계산 및 결과 출력
+        score = int((correct_count / total_questions) * 100)
+        print("\n" + "=" * 44)
+        print(f"🏆 최종 결과: {total_questions}문제 중 {correct_count}문제 정답! ({score}점)")
+
+        # 5. 최고 점수 갱신 판별 및 영속화
+        if score > self.best_score:
+            print(f"🎉 와우! 새로운 역대 최고 점수를 달성했습니다! ({self.best_score}점 ➔ {score}점)")
+            self.best_score = score
+            self.save_state()
+        else:
+            print(f"현재 역대 최고 점수: {self.best_score}점")
         print("=" * 44)
 
     def add_quiz(self) -> None:
